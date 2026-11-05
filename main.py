@@ -1,40 +1,45 @@
+from turtledemo.chaos import line
+
 def read_sql_file(file_path):
     with open(file_path,"r") as file:
         content=file.read()
         return content
 
-def extract_table_name(sql_text):
-    for line in sql_text.split("\n"):
-        clean=line.strip()
-
-        if clean.upper().startswith("CREATE TABLE"):
-            parts=clean.split()
-            table_name=parts[2].strip("(")
-            return table_name
-    return None
-
-def extract_columns(sql_text: str):
-    columns=[]
+def parse_sql(sql_text: str):
+    schema = { "table": {}, "relationships": []}
+    current_table = None
 
     for line in sql_text.split("\n"):
+        clean = line.strip().rstrip(",")
+        upper_line = clean.upper()
 
-        clean=line.strip().rstrip(",")
-        upper_line=clean.upper()
+        if upper_line.startswith("CREATE TABLE"):
+            current_table=clean.split()[2].split("(")[0].strip()
+            schema["table"][current_table]=[]
 
-        if upper_line.startswith("CREATE TABLE") or upper_line.startswith(");") or not clean:
-            continue
+        elif upper_line.startswith(");"):
+            current_table=None
 
-        words=clean.split()
-        col_name=words[0]
-        col_type=words[1]
-        is_pk= "PRIMARY KEY" in upper_line
+        elif current_table and clean:
+            words = clean.split()
+            col_name = words[0]
+            col_type = words[1]
+            is_pk = "PRIMARY KEY" in upper_line
 
-        columns.append({"name":col_name, "type": col_type, "is_pk": is_pk})
-    return columns
+            if "REFERENCES" in upper_line:
+                words_upper = upper_line.split()
+                ref_index = words_upper.index("REFERENCES")
+                target_table = (words[ref_index+1].split("("))[0]
+                schema["relationships"].append({"from": current_table, "to": target_table})
+
+            schema["table"][current_table].append({"name": col_name, "type": col_type, "is_pk": is_pk})
+
+    return schema
+
 
 if __name__=="__main__":
     sql_text= read_sql_file("data/test.sql")
-    table = extract_table_name(sql_text)
-    cols = extract_columns(sql_text)
-    print(f"Table : {table} ")
-    print(f"Columns : {cols}")
+    result = parse_sql(sql_text)
+
+    print("---Parsed Schema---")
+    print(result)
