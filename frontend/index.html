@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>LuxDB</title>
+
+        <style>
+
+            body {
+                padding: 20px;
+                font-family: sans-serif;
+            }
+
+            #load-btn {
+                padding: 10px 16px;
+                cursor: pointer;
+            }
+
+            #display-area {
+                background: #f1f5f9;
+                padding: 15px;
+                margin-top: 15px;
+                border-radius: 4px;
+            }
+        </style>
+    </head>
+    <body>
+
+        <h1>LuxDB</h1>
+        <p>Database Visualizer</p>
+
+        <button id="load-btn">
+            Load Schema
+        </button>
+
+        <pre id="display-area"></pre>
+
+        <script>
+
+            const btn = document.getElementById("load-btn");
+            const display = document.getElementById("display-area");
+
+            btn.addEventListener("click", async () => {
+                const response = await fetch("http://localhost:8000/api/schema");
+                const data = await response.json();
+                display.textContent = JSON.stringify(data,null,2)
+            });
+        </script>
+    </body>
+</html>
