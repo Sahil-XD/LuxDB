@@ -16,12 +16,30 @@
                 cursor: pointer;
             }
 
-            #display-area {
-                background: #f1f5f9;
-                padding: 15px;
-                margin-top: 15px;
-                border-radius: 4px;
+            #canvas-area{
+                display: flex;
+                gap: 20px;
+                margin-top: 20px;
+                flex-wrap: wrap;
             }
+
+            .table-card{
+                background: #ffffff ;
+                border: 1px solid #cbd5e1;
+                border-radius: 8px;
+                width: 240px;
+                box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+                overflow: hidden;
+            }
+
+            .table-header{
+                background: linear-gradient(135deg, #4f46e5, #06b6d4);
+                color: white;
+                font-weight: bold;
+                font-size: 14px;
+                padding: 8px 12px;
+            }
+
         </style>
     </head>
     <body>
@@ -33,17 +51,24 @@
             Load Schema
         </button>
 
-        <pre id="display-area"></pre>
+        <div id="canvas-area"></div>
 
         <script>
 
             const btn = document.getElementById("load-btn");
-            const display = document.getElementById("display-area");
+            const canvas = document.getElementById("canvas-area");
 
             btn.addEventListener("click", async () => {
                 const response = await fetch("http://localhost:8000/api/schema");
                 const data = await response.json();
-                display.textContent = JSON.stringify(data,null,2)
+
+                canvas.innerHTML = "";
+                for(const tableName in data.table) {
+                    const card = document.createElement("div");
+                    card.className = "table-card";
+                    card.innerHTML = `<div class="table-header">${tableName}</div>`;
+                    canvas.appendChild(card);
+                }
             });
         </script>
     </body>
