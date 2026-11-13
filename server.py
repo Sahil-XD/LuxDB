@@ -10,14 +10,14 @@ class LuxRequestHandler(BaseHTTPRequestHandler):
                 sql_text = file.read()
 
             schema = parse_sql(sql_text)
-            respomse_json = json.dumps(schema)
+            response_json = json.dumps(schema)
 
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
             self.send_header("Access-Control-Allow-Origin","*")
             self.end_headers()
 
-            self.wfile.write(respomse_json.encode("utf-8"))
+            self.wfile.write(response_json.encode("utf-8"))
 
         else:
             self.send_response(404)
