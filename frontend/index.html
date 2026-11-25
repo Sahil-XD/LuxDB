@@ -14,9 +14,7 @@
             }
 
             #canvas-area{
-                display: flex;
-                gap: 20px;
-                flex-wrap: wrap;
+                position: relative;
                 min-height: calc(100vh - 57px);
                 padding: 20px;
                 background-color: #F1F5F9;
@@ -25,12 +23,14 @@
             }
 
             .table-card{
+                position: absolute;
                 background: #ffffff ;
                 border: 1px solid #cbd5e1;
                 border-radius: 8px;
                 width: 240px;
                 box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
                 overflow: hidden;
+                user-select: none;
             }
 
             .table-header{
@@ -84,6 +84,7 @@
                 const data = await response.json();
 
                 canvas.innerHTML = "";
+                let x=30;
                 for(const tableName in data.table) {
                     const card = document.createElement("div");
                     card.className = "table-card";
@@ -100,6 +101,28 @@
                     }
 
                     canvas.appendChild(card);
+                    card.style.left = x+"px";
+                    card.style.top = "30px";
+                    x+=280;
+
+                    card.addEventListener("mousedown", (event) =>{
+                        const grabX = event.clientX - card.offsetLeft;
+                        const grabY = event.clientY - card.offsetTop;
+
+                        const follow = (moveEvent) => {
+                            card.style.left = (moveEvent.clientX - grabX) + "px";
+                            card.style.top = (moveEvent.clientY - grabY) + "px";
+                        };
+
+                        document.addEventListener("mousemove",follow);
+
+                        const stop = () => {
+                            document.removeEventListener("mousemove",follow);
+                            document.removeEventListener("mouseup",stop);
+                        };
+
+                        document.addEventListener("mouseup",stop);
+                    });
                 }
             });
         </script>
