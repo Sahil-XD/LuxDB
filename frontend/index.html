@@ -63,6 +63,14 @@
                 margin-left: 6px;
             }
 
+            #lines{
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                pointer-events: none;
+            }
         </style>
     </head>
     <body>
@@ -83,7 +91,24 @@
                 const response = await fetch("http://localhost:8000/api/schema");
                 const data = await response.json();
 
-                canvas.innerHTML = "";
+                canvas.innerHTML = `<svg id="lines"></svg>`;
+
+                const cards = {};
+
+                const drawLines = () => {
+                    let lineText = "";
+                    for (const rel of data.relationships) {
+                        const a = cards[rel.from];
+                        const b = cards[rel.to];
+                        const x1 = a.offsetLeft + a.offsetWidth / 2;
+                        const y1 = a.offsetTop + a.offsetHeight / 2;
+                        const x2 = b.offsetLeft + b.offsetWidth / 2;
+                        const y2 = b.offsetTop + b.offsetHeight / 2;
+                        lineText += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#94a3b8" stroke-width="2" />`;
+                    }
+                    document.getElementById("lines").innerHTML = lineText;
+                };
+
                 let x=30;
                 for(const tableName in data.table) {
                     const card = document.createElement("div");
@@ -101,6 +126,7 @@
                     }
 
                     canvas.appendChild(card);
+                    cards[tableName]=card;
                     card.style.left = x+"px";
                     card.style.top = "30px";
                     x+=280;
@@ -112,6 +138,7 @@
                         const follow = (moveEvent) => {
                             card.style.left = (moveEvent.clientX - grabX) + "px";
                             card.style.top = (moveEvent.clientY - grabY) + "px";
+                            drawLines();
                         };
 
                         document.addEventListener("mousemove",follow);
@@ -124,6 +151,7 @@
                         document.addEventListener("mouseup",stop);
                     });
                 }
+                drawLines();
             });
         </script>
     </body>
